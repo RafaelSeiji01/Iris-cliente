@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import SplashScreen from './components/SplashScreen';
 import Home from './pages/Home';
+import Header from './components/Header'
 
 
 
@@ -29,7 +30,6 @@ function App() {
 
   return (
     <div>
-
       {showSplash && <SplashScreen isFading={isFading} />}
       <Home />
     </div>
