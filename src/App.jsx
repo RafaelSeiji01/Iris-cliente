@@ -1,13 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import SplashScreen from './components/SplashScreen';
+import Home from './pages/Home';
+
 
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [showSplash, setShowSplash] = useState(true);
+  const [isFading, setIsFading] = useState(false);
+
+  useEffect(() => {
+    // 1. Fica visível por 1 segundo, depois inicia a transição suave
+    const fadeTimer = setTimeout(() => {
+      setIsFading(true);
+    }, 1000);
+
+    // 2. Remove completamente do DOM após o fade-out de 600ms
+    const removeTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 1600);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
+  
 
   return (
-    <>
-      <h1>ola mundo</h1>
-    </>
+    <div>
+
+      {showSplash && <SplashScreen isFading={isFading} />}
+      <Home />
+    </div>
   )
 }
 
