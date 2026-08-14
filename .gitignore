@@ -7,16 +7,30 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependências (raiz e subpastas)
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Builds
+dist/
+dist-ssr/
+build/
 *.local
+
+# SEGREDOS E VARIÁVEIS DE AMBIENTE 
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
