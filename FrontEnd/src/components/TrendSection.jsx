@@ -1,41 +1,41 @@
-// src/components/TrendSection.jsx
+// FrontEnd/src/components/TrendSection.jsx
 import React from 'react';
 
-export default function TrendSection() {
+export default function TrendSection({ insight }) {
   return (
-    <div className="space-y-4">
-      {/* Card da Tendência */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-sm md:text-base font-bold text-[#1a334d]">
+    <div className="flex flex-col gap-4">
+      {/* Gráfico Sparkline de Tendência */}
+      <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-xs font-bold text-slate-800 tracking-wide">
             Tendência • 7 dias
           </span>
-          <span className="text-xs text-slate-400">
+          <span className="text-[11px] font-medium text-slate-400">
             Score comportamental
           </span>
         </div>
 
-        <div className="w-full h-16">
-          <svg className="w-full h-16" viewBox="0 0 300 60" preserveAspectRatio="none">
+        <div className="h-16 w-full flex items-center justify-center">
+          <svg className="w-full h-full overflow-visible" viewBox="0 0 300 60">
             <path
-              d="M 5 40 Q 60 38, 100 40 T 170 32 T 220 48 T 270 30 L 290 25"
+              d="M 10 35 Q 80 30, 150 35 T 250 48 T 290 20"
               fill="none"
-              stroke="#6dbdb0"
+              stroke="#52b788"
               strokeWidth="3.5"
               strokeLinecap="round"
             />
-            <circle cx="290" cy="25" r="4.5" fill="#1a334d" />
+            <circle cx="290" cy="20" r="4.5" fill="#1a334d" />
           </svg>
         </div>
       </div>
 
-      {/* Card Azul: Insight */}
-      <div className="bg-[#163651] rounded-3xl p-5 md:p-6 text-white shadow-md">
-        <span className="text-[11px] font-extrabold tracking-widest text-slate-400 block mb-2 uppercase">
+      {/* Card Escuro de Insight Dinâmico */}
+      <div className="bg-[#1a334d] text-white p-5 rounded-2xl shadow-sm">
+        <div className="text-[10px] font-bold tracking-wider text-slate-300 uppercase mb-1.5">
           Insight do Dia
-        </span>
-        <p className="text-xs md:text-sm leading-relaxed text-slate-200">
-          O tempo para localizar aplicativos aumentou levemente nos últimos 3 dias. Ainda dentro da faixa normal — vamos continuar observando.
+        </div>
+        <p className="text-xs leading-relaxed text-slate-100">
+          {insight || 'Padrões de interação estáveis e dentro da faixa esperada.'}
         </p>
       </div>
     </div>

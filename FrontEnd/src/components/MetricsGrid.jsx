@@ -9,7 +9,7 @@ const MetricItem = ({ icon: Icon, title, value, tag, isAlert = false }) => (
         <Icon size={20} strokeWidth={2.2} />
       </div>
       <span
-        className={`text-xs font-semibold px-2.5 py-1 rounded-md ${
+        className={`text-xs font-semibold px-2.5 py-1 rounded-md transition-colors ${
           isAlert
             ? 'bg-amber-50 text-amber-600'
             : 'bg-emerald-50 text-emerald-700'
@@ -27,10 +27,20 @@ const MetricItem = ({ icon: Icon, title, value, tag, isAlert = false }) => (
 );
 
 export default function MetricsGrid({
-  velocidadeDigitacao = '42 ppm',
-  tempoHesitacao = '6.2s',
-  aberturasSemAcao = '2x',
+  velocidadeDigitacao = 42,
+  tempoHesitacao = 6.2,
+  aberturasSemAcao = 0,
 }) {
+  // Converte para número garantindo que comparações funcionem
+  const velNum = Number(velocidadeDigitacao) || 42;
+  const hesNum = Number(tempoHesitacao) || 6.0;
+  const aberNum = Number(aberturasSemAcao) || 0;
+
+  // Lógica clínica dinâmica dos alertas
+  const alertaLentidao = velNum < 35;
+  const alertaHesitacao = hesNum > 6.0;
+  const alertaAberturas = aberNum > 2;
+
   return (
     <div className="mt-6">
       <h3 className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-3">
@@ -42,27 +52,27 @@ export default function MetricsGrid({
         <MetricItem
           icon={Keyboard}
           title="Velocidade de digitação"
-          value={velocidadeDigitacao}
-          tag="estável"
-          isAlert={false}
+          value={`${velNum} ppm`}
+          tag={alertaLentidao ? 'lento' : 'estável'}
+          isAlert={alertaLentidao}
         />
 
         {/* 2. Tempo de Hesitação */}
         <MetricItem
           icon={Clock}
           title="Tempo sem ação na Home"
-          value={tempoHesitacao}
-          tag="+1.2s"
-          isAlert={true}
+          value={`${hesNum}s`}
+          tag={alertaHesitacao ? `+${(hesNum - 6.0).toFixed(1)}s` : 'estável'}
+          isAlert={alertaHesitacao}
         />
 
         {/* 3. Aberturas sem Ação */}
         <MetricItem
           icon={Smartphone}
           title="Aberturas sem ação"
-          value={aberturasSemAcao}
-          tag="estável"
-          isAlert={false}
+          value={`${aberNum}x`}
+          tag={alertaAberturas ? 'frequente' : 'estável'}
+          isAlert={alertaAberturas}
         />
       </div>
     </div>
