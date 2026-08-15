@@ -1,80 +1,45 @@
-// src/components/BottomNav.jsx
-import React, { useState } from 'react';
+// FrontEnd/src/components/BottomNav.jsx
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Home, BarChart3, Settings } from 'lucide-react';
 
 export default function BottomNav() {
-  const [active, setActive] = useState('inicio');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const navItems = [
+    { path: '/', label: 'Início', icon: Home },
+    { path: '/historico', label: 'Histórico', icon: BarChart3 },
+    { path: '/ajustes', label: 'Ajustes', icon: Settings },
+  ];
 
   return (
-    <nav style={{
-      position: 'fixed',
-      bottom: 0,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '100%',
-      maxWidth: '430px',
-      backgroundColor: '#ffffff',
-      borderTop: '1px solid #edf2f7',
-      display: 'flex',
-      justifyContent: 'space-around',
-      padding: '10px 0 16px 0',
-      zIndex: 100
-    }}>
-      <button
-        onClick={() => setActive('inicio')}
-        style={{
-          background: 'none',
-          border: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '4px',
-          cursor: 'pointer',
-          color: active === 'inicio' ? '#1a334d' : '#8fa0af',
-          fontWeight: active === 'inicio' ? '700' : '500',
-          fontSize: '12px'
-        }}
-      >
-        <span style={{ fontSize: '18px' }}>🏠</span>
-        Início
-      </button>
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 px-6 py-2 flex justify-around items-center z-50 shadow-lg">
+      {navItems.map((item) => {
+        const IconComponent = item.icon;
+        const isActive = location.pathname === item.path;
 
-      <button
-        onClick={() => setActive('historico')}
-        style={{
-          background: 'none',
-          border: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '4px',
-          cursor: 'pointer',
-          color: active === 'historico' ? '#1a334d' : '#8fa0af',
-          fontWeight: active === 'historico' ? '700' : '500',
-          fontSize: '12px'
-        }}
-      >
-        <span style={{ fontSize: '18px' }}>📊</span>
-        Histórico
-      </button>
-
-      <button
-        onClick={() => setActive('ajustes')}
-        style={{
-          background: 'none',
-          border: 'none',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '4px',
-          cursor: 'pointer',
-          color: active === 'ajustes' ? '#1a334d' : '#8fa0af',
-          fontWeight: active === 'ajustes' ? '700' : '500',
-          fontSize: '12px'
-        }}
-      >
-        <span style={{ fontSize: '18px' }}>⚙️</span>
-        Ajustes
-      </button>
+        return (
+          <button
+            key={item.path}
+            onClick={() => navigate(item.path)}
+            className="flex flex-col items-center gap-1 py-1 px-3 border-none bg-transparent cursor-pointer"
+          >
+            <IconComponent
+              size={22}
+              strokeWidth={isActive ? 2.5 : 1.8}
+              color={isActive ? '#2d8653' : '#94a3b8'}
+            />
+            <span
+              className={`text-[11px] ${
+                isActive ? 'font-bold text-[#2d8653]' : 'font-medium text-slate-400'
+              }`}
+            >
+              {item.label}
+            </span>
+          </button>
+        );
+      })}
     </nav>
   );
 }

@@ -1,39 +1,21 @@
-import { useState, useEffect } from 'react'
-import SplashScreen from './components/SplashScreen';
+// FrontEnd/src/App.jsx
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
 import Home from './pages/Home';
-import Header from './components/Header'
+import Historico from './pages/Historico';
+import Ajustes from './pages/Ajustes';
 
-
-
-function App() {
-
-  const [showSplash, setShowSplash] = useState(true);
-  const [isFading, setIsFading] = useState(false);
-
-  useEffect(() => {
-    // 1. Fica visível por 1 segundo, depois inicia a transição suave
-    const fadeTimer = setTimeout(() => {
-      setIsFading(true);
-    }, 1000);
-
-    // 2. Remove completamente do DOM após o fade-out de 600ms
-    const removeTimer = setTimeout(() => {
-      setShowSplash(false);
-    }, 1600);
-
-    return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(removeTimer);
-    };
-  }, []);
-  
-
+export default function App() {
   return (
-    <div>
-      {showSplash && <SplashScreen isFading={isFading} />}
-      <Home />
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="historico" element={<Historico />} />
+          <Route path="ajustes" element={<Ajustes />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App
