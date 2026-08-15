@@ -1,11 +1,20 @@
-// BackEnd/server.js
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import { pool } from './db.js';
-import { calcularScoreEInsight } from './scoreEngine.js';
+import { calcularScoreEInsight } from './ScoreEngine.js';
 
-dotenv.config();
+const paciente = {
+  id: 1,
+  nome: 'Paciente Teste',
+  idade: 70,
+};
+
+const scoresPorDia = {};
+const metricas = [];
+
+function hojeISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,48 +29,30 @@ app.get('/', (req, res) => {
 
 // 1. ROTA GET: Buscar dados do Paciente e Resumo do Dia
 // 1. ROTA GET: Busca o resumo com a ÚLTIMA medição do paciente
-app.get('/api/paciente/:id/resumo', async (req, res) => {
+app.get('/api/paciente/:id/resumo', (req, res) => {
   const { id } = req.params;
 
-  try {
-    const query = `
-      SELECT 
-        p.id,
-        p.nome,
-        p.idade,
-        COALESCE(s.score, 86) AS score,
-        COALESCE(s.status_dia, 'Padrão normal hoje') AS status_dia,
-        COALESCE(s.insight_dia, 'Monitoramento ativo.') AS insight_dia,
-        COALESCE(m.velocidade_digitacao, 42) AS velocidade_digitacao,
-        COALESCE(m.tempo_hesitacao_segundos, 6.0) AS tempo_hesitacao,
-        COALESCE(m.aberturas_sem_acao, 0) AS aberturas_sem_acao
-      FROM pacientes p
-      LEFT JOIN score_diario s 
-        ON s.paciente_id = p.id AND s.data_registro = CURRENT_DATE
-      LEFT JOIN LATERAL (
-        SELECT velocidade_digitacao, tempo_hesitacao_segundos, aberturas_sem_acao
-        FROM metricas_comportamentais
-        WHERE paciente_id = p.id
-        ORDER BY id DESC
-        LIMIT 1
-      ) m ON true
-      WHERE p.id = $1;
-    `;
-
-    const result = await pool.query(query, [id]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Paciente não encontrado' });
-    }
-
-    res.json(result.rows[0]);
-  } catch (error) {
-    console.error('Erro na consulta:', error);
-    res.status(500).json({ error: 'Erro ao buscar dados do paciente' });
+  if (Number(id) !== paciente.id) {
+    return res.status(404).json({ error: 'Paciente não encontrado' });
   }
+
+  const dataHoje = hojeISO();
+  const scoreHoje = scoresPorDia[dataHoje];
+  const ultimaMetrica = metricas.length > 0 ? metricas[metricas.length - 1] : null;
+
+  res.json({
+    id: paciente.id,
+    nome: paciente.nome,
+    idade: paciente.idade,
+    score: scoreHoje?.score ?? 86,
+    status_dia: scoreHoje?.status ?? 'Padrão normal hoje',
+    insight_dia: scoreHoje?.insight ?? 'Monitoramento ativo.',
+    velocidade_digitacao: ultimaMetrica?.velocidadeDigitacao ?? 42,
+    tempo_hesitacao: ultimaMetrica?.tempoHesitacao ?? 6.0,
+    aberturas_sem_acao: ultimaMetrica?.aberturasSemAcao ?? 0,
+  });
 });
 
-// 2. ROTA POST: Gravar nova medição e recalcular Score do dia
 app.post('/api/metricas', async (req, res) => {
   const body = req.body || {};
 
@@ -74,41 +65,29 @@ app.post('/api/metricas', async (req, res) => {
   // Log para você ver no terminal exatamente o que chegou
   console.log('📥 Recebido no POST:', { pacienteId, velocidadeDigitacao, tempoHesitacao, aberturasSemAcao });
 
-  try {
-    const metricasResult = await pool.query(
-      `INSERT INTO metricas_comportamentais 
-       (paciente_id, velocidade_digitacao, tempo_hesitacao_segundos, aberturas_sem_acao)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [pacienteId, velocidadeDigitacao, tempoHesitacao, aberturasSemAcao]
-    );
+   const novaMetrica = {
+    id: metricas.length + 1,
+    pacienteId,
+    velocidadeDigitacao,
+    tempoHesitacao,
+    aberturasSemAcao,
+    criadoEm: new Date().toISOString(),
+  };
+  metricas.push(novaMetrica);
 
-    const { score, status, insight } = calcularScoreEInsight({
-      velocidadeDigitacao: Number(velocidadeDigitacao),
-      tempoHesitacao: Number(tempoHesitacao),
-      aberturasSemAcao: Number(aberturasSemAcao),
-    });
+  const { score, status, insight } = calcularScoreEInsight({
+    velocidadeDigitacao,
+    tempoHesitacao,
+    aberturasSemAcao,
+  });
 
-    await pool.query(
-      `INSERT INTO score_diario (paciente_id, score, status_dia, insight_dia, data_registro)
-       VALUES ($1, $2, $3, $4, CURRENT_DATE)
-       ON CONFLICT (paciente_id, data_registro) 
-       DO UPDATE SET 
-         score = EXCLUDED.score,
-         status_dia = EXCLUDED.status_dia,
-         insight_dia = EXCLUDED.insight_dia`,
-      [pacienteId, score, status, insight]
-    );
+  scoresPorDia[hojeISO()] = { score, status, insight };
 
-    res.status(201).json({
-      mensagem: 'Métricas salvas e Score atualizado com sucesso!',
-      metrica: metricasResult.rows[0],
-      scoreAtualizado: { score, status, insight },
-    });
-  } catch (error) {
-    console.error('Erro ao processar métricas:', error);
-    res.status(500).json({ error: 'Erro interno ao processar métricas no banco' });
-  }
+  res.status(201).json({
+    mensagem: 'Métricas salvas e Score atualizado com sucesso! (em memória, sem banco de dados)',
+    metrica: novaMetrica,
+    scoreAtualizado: { score, status, insight },
+  });
 });
 
 app.listen(PORT, () => {
