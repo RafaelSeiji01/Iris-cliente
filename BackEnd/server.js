@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
 });
 
 // 1. ROTA GET: Buscar dados do Paciente e Resumo do Dia
+// 1. ROTA GET: Busca o resumo com a ÚLTIMA medição do paciente
 app.get('/api/paciente/:id/resumo', async (req, res) => {
   const { id } = req.params;
 
@@ -31,14 +32,20 @@ app.get('/api/paciente/:id/resumo', async (req, res) => {
         COALESCE(s.score, 86) AS score,
         COALESCE(s.status_dia, 'Padrão normal hoje') AS status_dia,
         COALESCE(s.insight_dia, 'Monitoramento ativo.') AS insight_dia,
-        ROUND(COALESCE(AVG(m.velocidade_digitacao), 42))::int AS velocidade_digitacao,
-        ROUND(COALESCE(AVG(m.tempo_hesitacao_segundos), 6.2)::numeric, 1) AS tempo_hesitacao,
-        COALESCE(MAX(m.aberturas_sem_acao), 0)::int AS aberturas_sem_acao
+        COALESCE(m.velocidade_digitacao, 42) AS velocidade_digitacao,
+        COALESCE(m.tempo_hesitacao_segundos, 6.0) AS tempo_hesitacao,
+        COALESCE(m.aberturas_sem_acao, 0) AS aberturas_sem_acao
       FROM pacientes p
-      LEFT JOIN score_diario s ON s.paciente_id = p.id AND s.data_registro = CURRENT_DATE
-      LEFT JOIN metricas_comportamentais m ON m.paciente_id = p.id AND m.created_at::DATE = CURRENT_DATE
-      WHERE p.id = $1
-      GROUP BY p.id, p.nome, p.idade, s.score, s.status_dia, s.insight_dia;
+      LEFT JOIN score_diario s 
+        ON s.paciente_id = p.id AND s.data_registro = CURRENT_DATE
+      LEFT JOIN LATERAL (
+        SELECT velocidade_digitacao, tempo_hesitacao_segundos, aberturas_sem_acao
+        FROM metricas_comportamentais
+        WHERE paciente_id = p.id
+        ORDER BY id DESC
+        LIMIT 1
+      ) m ON true
+      WHERE p.id = $1;
     `;
 
     const result = await pool.query(query, [id]);
