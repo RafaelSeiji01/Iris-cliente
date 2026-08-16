@@ -1,0 +1,141 @@
+// BackEnd/repositories/pacienteRepository.js
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { calcularScoreEInsight } from '../scoreEngine.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const pacienteInfo = {
+  id: 1,
+  nome: 'Seu Antônio',
+  idade: 70,
+};
+
+// Armazenamento em memória
+const scoresPorDia = {};
+const metricasHistorico = [];
+
+// Utilitários de data
+const getHojeISO = () => new Date().toISOString().slice(0, 10);
+const formatarDataBR = (dataIso) => {
+  const [ano, mes, dia] = dataIso.split('-');
+  return `${dia}/${mes}`;
+};
+
+// 1. Inicializa o estado em memória carregando o JSON
+export function inicializarRepositorio() {
+  try {
+    const caminhoJson = path.join(__dirname, '../data/historicoMock.json');
+    const dadosBrutos = fs.readFileSync(caminhoJson, 'utf-8');
+    const historicoSeed = JSON.parse(dadosBrutos);
+
+    historicoSeed.forEach((item) => {
+      const dataAlvo = new Date();
+      dataAlvo.setDate(dataAlvo.getDate() - item.diasAtras);
+      const dataIso = dataAlvo.toISOString().slice(0, 10);
+
+      const { score, status, insight } = calcularScoreEInsight({
+        velocidadeDigitacao: item.velocidadeDigitacao,
+        tempoHesitacao: item.tempoHesitacao,
+        aberturasSemAcao: item.aberturasSemAcao,
+      });
+
+      scoresPorDia[dataIso] = {
+        score,
+        status,
+        insight,
+        velocidadeDigitacao: item.velocidadeDigitacao,
+        tempoHesitacao: item.tempoHesitacao,
+        aberturasSemAcao: item.aberturasSemAcao,
+      };
+
+      metricasHistorico.push({
+        id: metricasHistorico.length + 1,
+        pacienteId: pacienteInfo.id,
+        velocidadeDigitacao: item.velocidadeDigitacao,
+        tempoHesitacao: item.tempoHesitacao,
+        aberturasSemAcao: item.aberturasSemAcao,
+        criadoEm: dataAlvo.toISOString(),
+      });
+    });
+
+    console.log(`📦 Repositório carregado: ${historicoSeed.length} dias históricos importados.`);
+  } catch (error) {
+    console.error('❌ Falha ao carregar historicoMock.json:', error.message);
+  }
+}
+
+// 2. Busca o resumo do dia atual (ou último valor conhecido)
+export function buscarResumoPaciente(pacienteId) {
+  if (Number(pacienteId) !== pacienteInfo.id) return null;
+
+  const dataHoje = getHojeISO();
+  const scoreHoje = scoresPorDia[dataHoje];
+  const ultimaMetrica = metricasHistorico.length > 0 
+    ? metricasHistorico[metricasHistorico.length - 1] 
+    : null;
+
+  return {
+    id: pacienteInfo.id,
+    nome: pacienteInfo.nome,
+    idade: pacienteInfo.idade,
+    score: scoreHoje?.score ?? 86,
+    status_dia: scoreHoje?.status ?? 'Padrão normal hoje',
+    insight_dia: scoreHoje?.insight ?? 'Monitoramento ativo.',
+    velocidade_digitacao: ultimaMetrica?.velocidadeDigitacao ?? 42,
+    tempo_hesitacao: ultimaMetrica?.tempoHesitacao ?? 6.0,
+    aberturas_sem_acao: ultimaMetrica?.aberturasSemAcao ?? 0,
+  };
+}
+
+// 3. Busca a série temporal dos últimos N dias
+export function buscarHistoricoPaciente(pacienteId, dias = 14) {
+  if (Number(pacienteId) !== pacienteInfo.id) return null;
+
+  return Object.keys(scoresPorDia)
+    .sort()
+    .slice(-dias)
+    .map((dataIso) => {
+      const reg = scoresPorDia[dataIso];
+      return {
+        data: formatarDataBR(dataIso),
+        data_registro: dataIso,
+        score: reg.score,
+        status_dia: reg.status,
+        insight_dia: reg.insight,
+      };
+    });
+}
+
+// 4. Salva uma nova medição e atualiza o score de hoje
+export function registrarMetricas({ pacienteId, velocidadeDigitacao, tempoHesitacao, aberturasSemAcao }) {
+  const novaMetrica = {
+    id: metricasHistorico.length + 1,
+    pacienteId,
+    velocidadeDigitacao,
+    tempoHesitacao,
+    aberturasSemAcao,
+    criadoEm: new Date().toISOString(),
+  };
+  metricasHistorico.push(novaMetrica);
+
+  const { score, status, insight } = calcularScoreEInsight({
+    velocidadeDigitacao,
+    tempoHesitacao,
+    aberturasSemAcao,
+  });
+
+  const dataHoje = getHojeISO();
+  scoresPorDia[dataHoje] = {
+    score,
+    status,
+    insight,
+    velocidadeDigitacao,
+    tempoHesitacao,
+    aberturasSemAcao,
+  };
+
+  return { novaMetrica, scoreAtualizado: { score, status, insight } };
+}

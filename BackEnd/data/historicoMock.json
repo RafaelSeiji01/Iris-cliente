@@ -1,0 +1,16 @@
+[
+  { "diasAtras": 14, "velocidadeDigitacao": 44, "tempoHesitacao": 5.2, "aberturasSemAcao": 1 },
+  { "diasAtras": 13, "velocidadeDigitacao": 42, "tempoHesitacao": 5.5, "aberturasSemAcao": 0 },
+  { "diasAtras": 12, "velocidadeDigitacao": 45, "tempoHesitacao": 4.8, "aberturasSemAcao": 1 },
+  { "diasAtras": 11, "velocidadeDigitacao": 41, "tempoHesitacao": 6.0, "aberturasSemAcao": 2 },
+  { "diasAtras": 10, "velocidadeDigitacao": 39, "tempoHesitacao": 6.5, "aberturasSemAcao": 1 },
+  { "diasAtras": 9,  "velocidadeDigitacao": 43, "tempoHesitacao": 5.0, "aberturasSemAcao": 0 },
+  { "diasAtras": 8,  "velocidadeDigitacao": 46, "tempoHesitacao": 4.9, "aberturasSemAcao": 1 },
+  { "diasAtras": 7,  "velocidadeDigitacao": 40, "tempoHesitacao": 6.1, "aberturasSemAcao": 2 },
+  { "diasAtras": 6,  "velocidadeDigitacao": 38, "tempoHesitacao": 7.2, "aberturasSemAcao": 3 },
+  { "diasAtras": 5,  "velocidadeDigitacao": 37, "tempoHesitacao": 8.0, "aberturasSemAcao": 2 },
+  { "diasAtras": 4,  "velocidadeDigitacao": 42, "tempoHesitacao": 5.8, "aberturasSemAcao": 1 },
+  { "diasAtras": 3,  "velocidadeDigitacao": 44, "tempoHesitacao": 5.1, "aberturasSemAcao": 0 },
+  { "diasAtras": 2,  "velocidadeDigitacao": 43, "tempoHesitacao": 5.4, "aberturasSemAcao": 1 },
+  { "diasAtras": 1,  "velocidadeDigitacao": 41, "tempoHesitacao": 5.9, "aberturasSemAcao": 1 }
+]

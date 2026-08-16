@@ -1,20 +1,15 @@
+// BackEnd/server.js
 import express from 'express';
 import cors from 'cors';
-import { calcularScoreEInsight } from './ScoreEngine.js';
+import {
+  inicializarRepositorio,
+  buscarResumoPaciente,
+  buscarHistoricoPaciente,
+  registrarMetricas,
+} from './repositories/pacienteRepository.js';
 
-const paciente = {
-  id: 1,
-  nome: 'Paciente Teste',
-  idade: 70,
-};
-
-const scoresPorDia = {};
-const metricas = [];
-
-function hojeISO() {
-  return new Date().toISOString().slice(0, 10);
-}
-
+// Inicializa a carga dos dados do JSON
+inicializarRepositorio();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,71 +17,52 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Rota de teste
+// Rota de Teste / Health Check
 app.get('/', (req, res) => {
   res.json({ status: 'API Iris ativa e operante 🚀' });
 });
 
-// 1. ROTA GET: Buscar dados do Paciente e Resumo do Dia
-// 1. ROTA GET: Busca o resumo com a ÚLTIMA medição do paciente
+// 1. GET: Resumo do Paciente
 app.get('/api/paciente/:id/resumo', (req, res) => {
-  const { id } = req.params;
-
-  if (Number(id) !== paciente.id) {
+  const paciente = buscarResumoPaciente(req.params.id);
+  if (!paciente) {
     return res.status(404).json({ error: 'Paciente não encontrado' });
   }
-
-  const dataHoje = hojeISO();
-  const scoreHoje = scoresPorDia[dataHoje];
-  const ultimaMetrica = metricas.length > 0 ? metricas[metricas.length - 1] : null;
-
-  res.json({
-    id: paciente.id,
-    nome: paciente.nome,
-    idade: paciente.idade,
-    score: scoreHoje?.score ?? 86,
-    status_dia: scoreHoje?.status ?? 'Padrão normal hoje',
-    insight_dia: scoreHoje?.insight ?? 'Monitoramento ativo.',
-    velocidade_digitacao: ultimaMetrica?.velocidadeDigitacao ?? 42,
-    tempo_hesitacao: ultimaMetrica?.tempoHesitacao ?? 6.0,
-    aberturas_sem_acao: ultimaMetrica?.aberturasSemAcao ?? 0,
-  });
+  res.json(paciente);
 });
 
-app.post('/api/metricas', async (req, res) => {
+// 2. GET: Histórico Temporal (Passado + Hoje)
+app.get('/api/paciente/:id/historico', (req, res) => {
+  const dias = parseInt(req.query.dias, 10) || 14;
+  const historico = buscarHistoricoPaciente(req.params.id, dias);
+  if (!historico) {
+    return res.status(404).json({ error: 'Paciente não encontrado' });
+  }
+  res.json(historico);
+});
+
+// 3. POST: Ingestão de Métricas
+app.post('/api/metricas', (req, res) => {
   const body = req.body || {};
 
-  // Aceita tanto camelCase quanto snake_case para não dar erro
   const pacienteId = body.pacienteId ?? body.paciente_id ?? 1;
   const velocidadeDigitacao = body.velocidadeDigitacao ?? body.velocidade_digitacao ?? 42;
   const tempoHesitacao = body.tempoHesitacao ?? body.tempo_hesitacao ?? body.tempo_hesitacao_segundos ?? 6.0;
   const aberturasSemAcao = body.aberturasSemAcao ?? body.aberturas_sem_acao ?? 0;
 
-  // Log para você ver no terminal exatamente o que chegou
   console.log('📥 Recebido no POST:', { pacienteId, velocidadeDigitacao, tempoHesitacao, aberturasSemAcao });
 
-   const novaMetrica = {
-    id: metricas.length + 1,
+  const { novaMetrica, scoreAtualizado } = registrarMetricas({
     pacienteId,
     velocidadeDigitacao,
     tempoHesitacao,
     aberturasSemAcao,
-    criadoEm: new Date().toISOString(),
-  };
-  metricas.push(novaMetrica);
-
-  const { score, status, insight } = calcularScoreEInsight({
-    velocidadeDigitacao,
-    tempoHesitacao,
-    aberturasSemAcao,
-  });
-
-  scoresPorDia[hojeISO()] = { score, status, insight };
+  }); 
 
   res.status(201).json({
-    mensagem: 'Métricas salvas e Score atualizado com sucesso! (em memória, sem banco de dados)',
+    mensagem: 'Métricas processadas e Score atualizado com sucesso!',
     metrica: novaMetrica,
-    scoreAtualizado: { score, status, insight },
+    scoreAtualizado,
   });
 });
 
