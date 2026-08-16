@@ -6,7 +6,10 @@ import {
   buscarResumoPaciente,
   buscarHistoricoPaciente,
   registrarMetricas,
+  buscarAlertasPaciente,
+  alternarStatusAlerta,
 } from './repositories/pacienteRepository.js';
+
 
 // Inicializa a carga dos dados do JSON
 inicializarRepositorio();
@@ -68,4 +71,18 @@ app.post('/api/metricas', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+});
+
+// ... rotas anteriores ...
+
+// 4. GET: Alertas Reais Gerados Automaticamente
+app.get('/api/paciente/:id/alertas', (req, res) => {
+  const alertas = buscarAlertasPaciente(req.params.id);
+  res.json(alertas);
+});
+
+// 5. PATCH: Marcar ou desmarcar alerta como revisado
+app.patch('/api/alertas/:id/revisar', (req, res) => {
+  const resultado = alternarStatusAlerta(req.params.id);
+  res.json(resultado);
 });

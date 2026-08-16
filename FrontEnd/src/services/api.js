@@ -53,3 +53,28 @@ export async function enviarMetricasComportamentais({
     return null;
   }
 }
+
+// Busca os alertas reais gerados a partir do histórico
+export async function getAlertasPaciente(pacienteId = 1) {
+  try {
+    const res = await fetch(`${API_URL}/paciente/${pacienteId}/alertas`);
+    if (!res.ok) throw new Error('Erro ao buscar alertas');
+    return await res.json();
+  } catch (error) {
+    console.error('Erro no getAlertasPaciente:', error);
+    return [];
+  }
+}
+
+// Marca/desmarca o alerta como revisado
+export async function toggleAlertaRevisado(alertaId) {
+  try {
+    const res = await fetch(`${API_URL}/alertas/${alertaId}/revisar`, {
+      method: 'PATCH',
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao revisar alerta:', error);
+    return null;
+  }
+}

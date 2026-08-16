@@ -91,7 +91,7 @@ export function buscarResumoPaciente(pacienteId) {
 }
 
 // 3. Busca a série temporal dos últimos N dias
-export function buscarHistoricoPaciente(pacienteId, dias = 14) {
+export function buscarHistoricoPaciente(pacienteId, dias = 30) {
   if (Number(pacienteId) !== pacienteInfo.id) return null;
 
   return Object.keys(scoresPorDia)
@@ -138,4 +138,57 @@ export function registrarMetricas({ pacienteId, velocidadeDigitacao, tempoHesita
   };
 
   return { novaMetrica, scoreAtualizado: { score, status, insight } };
+}
+
+// Armazena os IDs dos alertas marcados como revisados em memória
+const alertasRevisados = new Set();
+
+// Gera a lista dinâmica de alertas analisando o histórico
+export function buscarAlertasPaciente(pacienteId) {
+  if (Number(pacienteId) !== pacienteInfo.id) return [];
+
+  const alertas = [];
+
+  // Percorre as datas ordenadas da mais recente para a mais antiga
+  const datas = Object.keys(scoresPorDia).sort().reverse();
+
+  datas.forEach((dataIso, index) => {
+    const reg = scoresPorDia[dataIso];
+    if (reg.score < 85) {
+      const isCritico = reg.score < 75;
+      const dataLabel = index === 0 ? 'Hoje' : index === 1 ? 'Ontem' : formatarDataBR(dataIso);
+
+      let textoExplicativo = reg.insight;
+      if (reg.tempoHesitacao > 15) {
+        textoExplicativo = `Tempo de hesitação elevado (${reg.tempoHesitacao}s) detectado durante o uso.`;
+      } else if (reg.velocidadeDigitacao < 30) {
+        textoExplicativo = `Velocidade de digitação abaixo do habitual (${reg.velocidadeDigitacao} ppm).`;
+      } else if (reg.aberturasSemAcao > 2) {
+        textoExplicativo = `Múltiplas aberturas do app (${reg.aberturasSemAcao}x) sem interação consecutiva.`;
+      }
+
+      alertas.push({
+        id: `alerta-${dataIso}`,
+        tipo: isCritico ? 'ATENÇÃO' : 'LEVE',
+        data: dataLabel,
+        dataIso,
+        score: reg.score,
+        texto: textoExplicativo,
+        revisado: alertasRevisados.has(`alerta-${dataIso}`),
+      });
+    }
+  });
+
+  return alertas;
+}
+
+// Alterna o status de revisado de um alerta
+export function alternarStatusAlerta(alertaId) {
+  if (alertasRevisados.has(alertaId)) {
+    alertasRevisados.delete(alertaId);
+    return { id: alertaId, revisado: false };
+  } else {
+    alertasRevisados.add(alertaId);
+    return { id: alertaId, revisado: true };
+  }
 }

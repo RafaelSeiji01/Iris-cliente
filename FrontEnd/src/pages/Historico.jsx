@@ -1,31 +1,41 @@
 // FrontEnd/src/pages/Historico.jsx
 import React, { useState, useEffect } from 'react';
 import HistoricoChart from '../components/HistoricoChart';
-import { getHistoricoPaciente } from '../services/api';
+import AlertasRecentes from '../components/AlertasRecentes';
+import RelatorioBanner from '../components/RelatorioBanner';
+import { getHistoricoPaciente, getAlertasPaciente } from '../services/api';
 
 export default function Historico() {
-  const [periodo, setPeriodo] = useState(14); // 7, 14 ou 30 dias
+  const [periodo, setPeriodo] = useState(14);
   const [historico, setHistorico] = useState([]);
-  const [carregando, setCarregando] = useState(true);
+  const [alertas, setAlertas] = useState([]);
 
   useEffect(() => {
-    async function carregar() {
-      setCarregando(true);
-      const dados = await getHistoricoPaciente(1, periodo);
-      setHistorico(dados);
-      setCarregando(false);
+    async function carregarDados() {
+      const [dadosHistorico, dadosAlertas] = await Promise.all([
+        getHistoricoPaciente(1, periodo),
+        getAlertasPaciente(1),
+      ]);
+      setHistorico(dadosHistorico);
+      setAlertas(dadosAlertas);
     }
-    carregar();
+    carregarDados();
   }, [periodo]);
 
+  const handleAlertaAtualizado = (id, revisado) => {
+    setAlertas((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, revisado } : a))
+    );
+  };
+
   return (
-    <div className="w-full max-w-md md:max-w-4xl lg:max-w-5xl space-y-6 pb-8">
+    <div className="w-full max-w-md md:max-w-4xl lg:max-w-5xl space-y-6 pb-12">
       {/* Título Principal */}
       <h1 className="text-xl md:text-2xl font-black text-[#1a334d]">
         Histórico Cognitivo
       </h1>
 
-      {/* Seletor de Período (Pills) */}
+      {/* Seletor de Período */}
       <div className="bg-slate-100 p-1 rounded-2xl flex items-center justify-between gap-1 max-w-md">
         {[
           { label: '7 dias', valor: 7 },
@@ -49,8 +59,17 @@ export default function Historico() {
         })}
       </div>
 
-      {/* Gráfico Geral de Score */}
+      {/* Gráfico Geral */}
       <HistoricoChart dados={historico} />
+
+      {/* Alertas Reais Conectados aos Dados */}
+      <AlertasRecentes
+        alertas={alertas}
+        onAlertaAtualizado={handleAlertaAtualizado}
+      />
+
+      {/* Banner de Envio para o Médico */}
+      <RelatorioBanner />
     </div>
   );
 }
