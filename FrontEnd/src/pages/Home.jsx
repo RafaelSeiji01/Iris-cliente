@@ -3,22 +3,27 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import ScoreCard from '../components/ScoreCard';
 import MetricsGrid from '../components/MetricsGrid';
-import TrendSection from '../components/TrendSection';
-import { getResumoPaciente } from '../services/api';
+import TendenciaCard from '../components/TendenciaCard';
+import { getResumoPaciente, getHistoricoPaciente } from '../services/api';
 
 export default function Home() {
   const [dados, setDados] = useState(null);
+  const [historico7Dias, setHistorico7Dias] = useState([]);
 
   useEffect(() => {
     async function carregarDados() {
       try {
-        const paciente = await getResumoPaciente(1);
-        console.log('📥 DADOS QUE CHEGARAM DA API:', paciente);
-        if (paciente) {
-          setDados(paciente);
-        }
+        const [paciente, historico] = await Promise.all([
+          getResumoPaciente(1),
+          getHistoricoPaciente(1, 7),
+        ]);
+
+        console.log('📥 DADOS QUE CHEGARAM DA API:', { paciente, historico });
+
+        if (paciente) setDados(paciente);
+        if (historico) setHistorico7Dias(historico);
       } catch (error) {
-        console.error('Erro ao carregar paciente:', error);
+        console.error('Erro ao carregar dados da Home:', error);
       }
     }
 
@@ -38,14 +43,14 @@ export default function Home() {
       {/* Cabeçalho */}
       <Header name={dados.nome} status={dados.status_dia} />
 
-      {/* Cards de Score e Tendência */}
+      {/* Cards de Score e Tendência Preditiva */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
         <ScoreCard score={dados.score} />
-        <TrendSection insight={dados.insight_dia} />
+        <TendenciaCard historico={historico7Dias} />
       </div>
 
-      {/* Métricas Dinâmicas - Verifique os nomes das chaves */}
-      <MetricsGrid 
+      {/* Métricas Dinâmicas */}
+      <MetricsGrid
         velocidadeDigitacao={dados.velocidade_digitacao}
         tempoHesitacao={dados.tempo_hesitacao}
         aberturasSemAcao={dados.aberturas_sem_acao}
