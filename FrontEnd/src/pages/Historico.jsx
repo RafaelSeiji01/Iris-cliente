@@ -1,12 +1,12 @@
 // FrontEnd/src/pages/Historico.jsx
 import React, { useState, useEffect } from 'react';
-import HistoricoChart from '../components/HistoricoChart';
+import HistoricoChartApex from '../components/HistoricoChartApex';
 import AlertasRecentes from '../components/AlertasRecentes';
 import RelatorioBanner from '../components/RelatorioBanner';
 import { getHistoricoPaciente, getAlertasPaciente } from '../services/api';
 
 export default function Historico() {
-  const [periodo, setPeriodo] = useState(14);
+  const [periodo, setPeriodo] = useState(30);
   const [historico, setHistorico] = useState([]);
   const [alertas, setAlertas] = useState([]);
 
@@ -30,7 +30,6 @@ export default function Historico() {
 
   return (
     <div className="w-full max-w-md md:max-w-4xl lg:max-w-5xl space-y-6 pb-12">
-      {/* Título Principal */}
       <h1 className="text-xl md:text-2xl font-black text-[#1a334d]">
         Histórico Cognitivo
       </h1>
@@ -59,16 +58,14 @@ export default function Historico() {
         })}
       </div>
 
-      {/* Gráfico Geral */}
-      <HistoricoChart dados={historico} />
+      {/* Gráfico ApexCharts */}
+      <HistoricoChartApex dados={historico} />
 
-      {/* Alertas Reais Conectados aos Dados */}
+      {/* Alertas e Banner */}
       <AlertasRecentes
         alertas={alertas}
         onAlertaAtualizado={handleAlertaAtualizado}
       />
-
-      {/* Banner de Envio para o Médico */}
       <RelatorioBanner />
     </div>
   );

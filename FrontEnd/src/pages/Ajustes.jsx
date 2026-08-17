@@ -10,7 +10,7 @@ export default function Ajustes() {
       </div>
 
       <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] text-center py-16">
-        <span className="text-4xl">⚙️</span>
+        <span className="text-4xl">⚙️ </span>
         <h3 className="text-lg font-bold text-[#1a334d] mt-4">Configurações</h3>
         <p className="text-sm text-slate-400 max-w-sm mx-auto mt-2">
           Parâmetros de sensibilidade de alerta e dados de contato de emergência do paciente.
