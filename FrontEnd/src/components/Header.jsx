@@ -1,47 +1,38 @@
-// src/components/Header.jsx
-import React from 'react'
+// FrontEnd/src/components/Header.jsx
+import React from 'react';
 
+export default function Header({ name = 'Antônio', status = 'Padrão normal hoje' }) {
+  // Verifica se o status indica alerta/atenção
+  const isAlerta =
+    typeof status === 'string' &&
+    (status.toLowerCase().includes('atenção') ||
+     status.toLowerCase().includes('alerta') ||
+     status.toLowerCase().includes('desvio'));
 
-const Header = ({ name = " Antônio" }) => {
   return (
-    <div style={{ marginBottom: '20px' }}>
-      {/* Subtítulo */}
-      <span style={{ color: '#8fa0af', fontSize: '15px', fontWeight: '500' }}>
-        Bom dia,
-      </span>
-
-      {/* Nome do Paciente */}
-      <h1 style={{
-        color: '#1a334d',
-        fontSize: '28px',
-        fontWeight: '800',
-        margin: '2px 0 10px 0'
-      }}>
+    <div className="flex flex-col gap-1.5 mb-2">
+      <span className="text-xs font-semibold text-slate-400">Bom dia,</span>
+      <h1 className="text-2xl md:text-3xl font-black text-[#1a334d] tracking-tight">
         {name}
       </h1>
 
-      {/* Tag de Status Diário */}
-      <div style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '8px',
-        backgroundColor: '#ebf7f0',
-        color: '#2d8653',
-        padding: '6px 14px',
-        borderRadius: '20px',
-        fontSize: '13px',
-        fontWeight: '600'
-      }}>
-        <span style={{
-          width: '7px',
-          height: '7px',
-          borderRadius: '50%',
-          backgroundColor: '#2d8653'
-        }} />
-        Padrão normal hoje
+      {/* Badge de Status Dinâmica */}
+      <div className="flex items-center mt-1">
+        <span
+          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+            isAlerta
+              ? 'bg-amber-50 text-amber-800 border border-amber-200'
+              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+          }`}
+        >
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isAlerta ? 'bg-[#d97706]' : 'bg-[#2d8653]'
+            }`}
+          />
+          {status}
+        </span>
       </div>
     </div>
-  )
+  );
 }
-
-export default Header

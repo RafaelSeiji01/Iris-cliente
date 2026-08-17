@@ -11,8 +11,8 @@ const MetricItem = ({ icon: Icon, title, value, tag, isAlert = false }) => (
       <span
         className={`text-xs font-semibold px-2.5 py-1 rounded-md transition-colors ${
           isAlert
-            ? 'bg-amber-50 text-amber-600'
-            : 'bg-emerald-50 text-emerald-700'
+            ? 'bg-amber-50 text-amber-600 border border-amber-200'
+            : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
         }`}
       >
         {tag}
@@ -26,20 +26,26 @@ const MetricItem = ({ icon: Icon, title, value, tag, isAlert = false }) => (
   </div>
 );
 
-export default function MetricsGrid({
-  velocidadeDigitacao = 42,
-  tempoHesitacao = 6.2,
-  aberturasSemAcao = 0,
-}) {
-  // Converte para número garantindo que comparações funcionem
-  const velNum = Number(velocidadeDigitacao) || 42;
-  const hesNum = Number(tempoHesitacao) || 6.0;
-  const aberNum = Number(aberturasSemAcao) || 0;
+export default function MetricsGrid(props) {
+  // Aceita tanto camelCase quanto snake_case sem quebrar com valor 0
+  const rawVel = props.velocidadeDigitacao ?? props.velocidade_digitacao ?? 42;
+  const rawHes = props.tempoHesitacao ?? props.tempo_hesitacao ?? 6.0;
+  const rawAber = props.aberturasSemAcao ?? props.aberturas_sem_acao ?? 0;
 
-  // Lógica clínica dinâmica dos alertas
+  const velNum = !isNaN(Number(rawVel)) ? Number(rawVel) : 42;
+  const hesNum = !isNaN(Number(rawHes)) ? Number(rawHes) : 6.0;
+  const aberNum = !isNaN(Number(rawAber)) ? Number(rawAber) : 0;
+
+  // Regras clínicas de alerta
   const alertaLentidao = velNum < 35;
-  const alertaHesitacao = hesNum > 6.0;
+  const alertaHesitacao = hesNum > 10.0;
   const alertaAberturas = aberNum > 2;
+
+  // Cálculo da diferença de hesitação
+  const difHesitacao = hesNum - 6.0;
+  const tagHesitacao = alertaHesitacao
+    ? `+${difHesitacao > 0 ? difHesitacao.toFixed(0) : 0}s`
+    : 'estável';
 
   return (
     <div className="mt-6">
@@ -62,7 +68,7 @@ export default function MetricsGrid({
           icon={Clock}
           title="Tempo sem ação na Home"
           value={`${hesNum}s`}
-          tag={alertaHesitacao ? `+${(hesNum - 6.0).toFixed(1)}s` : 'estável'}
+          tag={tagHesitacao}
           isAlert={alertaHesitacao}
         />
 
