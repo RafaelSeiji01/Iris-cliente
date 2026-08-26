@@ -68,25 +68,36 @@ export function inicializarRepositorio() {
 }
 
 // 2. Busca o resumo do dia atual (ou último valor conhecido)
+
 export function buscarResumoPaciente(pacienteId) {
   if (Number(pacienteId) !== pacienteInfo.id) return null;
 
-  const dataHoje = getHojeISO();
-  const scoreHoje = scoresPorDia[dataHoje];
-  const ultimaMetrica = metricasHistorico.length > 0 
-    ? metricasHistorico[metricasHistorico.length - 1] 
-    : null;
+  const hojeIso = new Date().toISOString().split('T')[0];
+  const registroHoje = scoresPorDia[hojeIso] || {
+    score: 88,
+    status: 'Padrão normal hoje',
+    insight: 'Tempo de resposta dentro da média habitual dos últimos 30 dias.',
+    velocidadeDigitacao: 42,
+    tempoHesitacao: 5.5,
+    aberturasSemAcao: 1,
+  };
 
   return {
     id: pacienteInfo.id,
     nome: pacienteInfo.nome,
-    idade: pacienteInfo.idade,
-    score: scoreHoje?.score ?? 86,
-    status_dia: scoreHoje?.status ?? 'Padrão normal hoje',
-    insight_dia: scoreHoje?.insight ?? 'Monitoramento ativo.',
-    velocidade_digitacao: ultimaMetrica?.velocidadeDigitacao ?? 42,
-    tempo_hesitacao: ultimaMetrica?.tempoHesitacao ?? 6.0,
-    aberturas_sem_acao: ultimaMetrica?.aberturasSemAcao ?? 0,
+    score: registroHoje.score,
+    status_dia: registroHoje.status,
+    insight_dia: registroHoje.insight,
+
+    // Compatibilidade dupla (camelCase e snake_case)
+    velocidadeDigitacao: registroHoje.velocidadeDigitacao,
+    velocidade_digitacao: registroHoje.velocidadeDigitacao,
+
+    tempoHesitacao: registroHoje.tempoHesitacao,
+    tempo_hesitacao: registroHoje.tempoHesitacao,
+
+    aberturasSemAcao: registroHoje.aberturasSemAcao,
+    aberturas_sem_acao: registroHoje.aberturasSemAcao,
   };
 }
 
