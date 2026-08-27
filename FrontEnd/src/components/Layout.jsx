@@ -1,7 +1,7 @@
 // FrontEnd/src/components/Layout.jsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import Sidebar from './SideBar';
 import BottomNav from './BottomNav';
 
 export default function Layout() {

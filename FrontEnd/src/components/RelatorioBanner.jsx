@@ -1,25 +1,23 @@
-// FrontEnd/src/components/RelatorioBanner.jsx
 import React, { useState } from 'react';
 import { Download, Check } from 'lucide-react';
-import * as api from '../services/api';
+import { baixarRelatorioPdf } from '../services/api';
 
 export default function RelatorioBanner() {
   const [loading, setLoading] = useState(false);
   const [baixado, setBaixado] = useState(false);
 
   const handleDownload = async () => {
-    if (loading) return;
     setLoading(true);
 
     try {
-      if (typeof api.baixarRelatorioPdf === 'function') {
-        const sucesso = await api.baixarRelatorioPdf(1);
+      if (typeof baixarRelatorioPdf === 'function') {
+        const sucesso = await baixarRelatorioPdf(1);
         if (sucesso) {
           setBaixado(true);
           setTimeout(() => setBaixado(false), 3000);
         }
       } else {
-        // Fallback direto via redirecionamento caso a função não exista
+        // Fallback direto via redirecionamento
         window.open('http://localhost:3001/api/paciente/1/relatorio-pdf', '_blank');
         setBaixado(true);
         setTimeout(() => setBaixado(false), 3000);
