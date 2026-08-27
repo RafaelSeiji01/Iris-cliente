@@ -1,8 +1,11 @@
 // FrontEnd/src/pages/Ajustes.jsx
 import React, { useState } from 'react';
-import { Settings, Bell, Shield, UserCheck, Save, Check } from 'lucide-react';
+import { Settings, Bell, Shield, UserCheck, Save, Check, User, Activity } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 export default function Ajustes() {
+  // Mantemos o 'perfil' para ler os dados, mas não precisamos usar o 'atualizarPerfil' aqui
+  const { perfil } = useUser(); 
   const [salvo, setSalvo] = useState(false);
   const [config, setConfig] = useState({
     sensibilidade: 'moderada', // alta, moderada, baixa
@@ -32,6 +35,48 @@ export default function Ajustes() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        
+        {/* CARD MODIFICADO: Perfil do Usuário (Fixo / Somente Leitura) */}
+        <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <User size={18} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-[#1a334d]">Identificação do Usuário</h3>
+              <p className="text-[11px] text-slate-400">Informações fixas vinculadas ao seu cadastro</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label className="block text-xs font-bold text-[#1a334d] mb-1">
+                Nome 
+              </label>
+              <input
+                type="text"
+                value={perfil.nome}
+                disabled
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-500 bg-slate-50 cursor-not-allowed focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#1a334d] mb-1">
+                Seu Papel no App
+              </label>
+              <select
+                value={perfil.papel}
+                disabled
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-500 bg-slate-50 cursor-not-allowed focus:outline-none appearance-none"
+              >
+                <option value="Paciente">Paciente</option>
+                <option value="Médico">Médico Monitor</option>
+                <option value="Cuidador">Cuidador / Familiar</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         {/* Card 1: Sensibilidade de Monitoramento */}
         <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4">
           <div className="flex items-center gap-2.5">

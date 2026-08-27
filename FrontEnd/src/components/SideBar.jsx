@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, BarChart3, Settings } from 'lucide-react';
 import logoIris from '../assets/logo.png';
+import ProfileBadge from './ProfileBadge'; // <-- 1. Importamos o componente aqui
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -79,41 +80,9 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* Perfil Simplificado */}
-      <div
-        style={{
-          padding: '12px 14px',
-          borderRadius: '16px',
-          backgroundColor: '#f8fafc',
-          border: '1px solid #edf2f7',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}
-      >
-        <div
-          style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '50%',
-            backgroundColor: '#a6d5cb',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: '700',
-            fontSize: '13px',
-            color: '#1a334d',
-          }}
-        >
-          SA
-        </div>
-        <div>
-          <p style={{ margin: 0, fontSize: '13px', fontWeight: '700', color: '#1a334d' }}>
-            Seu Antônio
-          </p>
-          <p style={{ margin: 0, fontSize: '11px', color: '#8fa0af' }}>Paciente</p>
-        </div>
-      </div>
+      {/* 2. Trocamos todo aquele código estático por apenas esta linha */}
+      <ProfileBadge />
+      
     </aside>
   );
 }
