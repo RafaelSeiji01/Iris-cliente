@@ -20,6 +20,12 @@ export default function Home() {
 
         console.log('📥 DADOS QUE CHEGARAM DA API:', { paciente, historico });
 
+        
+        // Se temos os dois dados, forçamos o último dia do histórico a ter o score real de hoje
+        if (paciente && historico && historico.length > 0) {
+          historico[historico.length - 1].score = paciente.score;
+        }
+
         if (paciente) setDados(paciente);
         if (historico) setHistorico7Dias(historico);
       } catch (error) {
@@ -41,7 +47,7 @@ export default function Home() {
   return (
     <div className="w-full max-w-md md:max-w-4xl lg:max-w-5xl">
       {/* Cabeçalho */}
-      <Header name={dados.nome} status={dados.status_dia} />
+      <Header status={dados.status_dia} />
 
       {/* Cards de Score e Tendência Preditiva */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
