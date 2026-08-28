@@ -1,7 +1,7 @@
 // FrontEnd/src/components/Layout.jsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import Sidebar from './SideBar';
 import BottomNav from './BottomNav';
 
 export default function Layout() {
@@ -10,7 +10,7 @@ export default function Layout() {
       {/* Sidebar Visível no Desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-100 p-6 sticky top-0 h-screen z-10">
         <Sidebar />
-      </aside>
+      </aside>  
 
       {/* Conteúdo Principal onde as páginas renderizam */}
       <main className="flex-1 flex justify-center pb-24 md:pb-12 pt-6 px-4 sm:px-6 lg:px-8">
@@ -22,5 +22,7 @@ export default function Layout() {
         <BottomNav />
       </div>
     </div>
+
+    //olaaa
   );
 }
