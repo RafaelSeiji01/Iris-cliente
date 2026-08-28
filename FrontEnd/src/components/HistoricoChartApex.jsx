@@ -50,13 +50,11 @@ export default function HistoricoChartApex({ dados = [] }) {
       parentHeightOffset: 0,
     },
     stroke: {
-      // 'monotoneCubic' evita que a curva passe para fora dos limites inferior/superior
       curve: 'monotoneCubic',
       width: 3.5,
       colors: ['#1a334d'],
     },
     colors: ['#1a334d'],
-    // Faixa verde sombreada (Padrão Normal: 75 a 100)
     annotations: {
       yaxis: [
         {
@@ -84,14 +82,14 @@ export default function HistoricoChartApex({ dados = [] }) {
       categories: categorias,
       axisBorder: { show: false },
       axisTicks: { show: false },
+      tickAmount: 6, // Força a exibir no máximo 6 datas distribuídas uniformemente na tela
       labels: {
-        style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 500 },
-        rotate: -45,
+        style: { colors: '#94a3b8', fontSize: '10px', fontWeight: 500 },
+        rotate: 0, // Mantém retas e limpas
         hideOverlappingLabels: true,
       },
     },
     yaxis: {
-      // Escala completa de 0 a 100 evita qualquer corte no fundo
       min: 0,
       max: 100,
       tickAmount: 5,
@@ -153,8 +151,8 @@ export default function HistoricoChartApex({ dados = [] }) {
         </div>
       </div>
 
-      {/* Gráfico sem cortes */}
-      <div className="w-full min-h-[320px]">
+      {/* Gráfico limpo com espaçamento inteligente */}
+      <div className="w-full">
         <Chart
           options={chartOptions}
           series={chartSeries}
