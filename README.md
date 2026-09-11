@@ -1,6 +1,9 @@
 # Projeto Iris
  
 Projeto full stack composto por um **FrontEnd** em React + Vite e um **BackEnd** em Node.js + Express, focado em monitoramento comportamental.
+
+
+![Configuração de Parâmetros](FrontEnd/img/parametro.png)
  
 ## Estrutura do projeto
  
@@ -158,7 +161,7 @@ Após disparar o método POST, repita o GET. Os valores de `score`, `status_dia`
  
 ---
 
-## 🚀 Bibliotecas e Tecnologias Utilizadas
+##  Bibliotecas e Tecnologias Utilizadas
  
 ### FrontEnd
 * **React 19:** Biblioteca principal para a construção da interface de usuário baseada em componentes.
