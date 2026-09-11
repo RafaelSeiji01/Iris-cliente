@@ -31,7 +31,7 @@ npm -v
 ## 1. Clonando o repositório
  
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone https://github.com/RafaelSeiji01/Iris-cliente.git
 cd Iris-cliente
 ```
  
